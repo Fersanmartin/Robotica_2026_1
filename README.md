@@ -26,10 +26,10 @@ py -m venv venv
 ### Descargar dependencias
 ```bash
 venv\Scripts\activate
-pip install -r requeriments.txt
+pip install -r requirements.txt
 ```
 
 ### Probar codigo
 ```bash
-python 
+python ur5_tutorial.py
 ```
