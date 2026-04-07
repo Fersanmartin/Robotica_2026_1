@@ -10,16 +10,37 @@ datos = mujoco.MjData(modelo)
 
 # Variables de control de estado
 stage = 0
+
+vel_x = 0.0
+vel_y = 0.0
+vel_z = 0.0
+
 def key_callback(keycode):
-    """Función que se ejecuta cuando se presiona una tecla en la ventana"""
-    global stage, ejecutar_paso
-    # 32 es el código ASCII para la barra espaciadora
-    if keycode == 32:
+    global stage, ejecutar_paso, vel_x, vel_y, vel_z
+    #print("tecla:", keycode)
+    if keycode == 32:  # espacio
         stage += 1 
         ejecutar_paso = True
         print(f"estado actual {stage}")
 
+    elif keycode == 87:  # W
+        vel_z += 1
+        print("W presionado")
+
+    elif keycode == 97:  # A
+        print("A presionado")
+
+    elif keycode == 83:  # S
+        vel_z -= 1
+        print("S presionado")
+
+    elif keycode == 100:  # D
+        print("D presionado")
+
 with mujoco.viewer.launch_passive(modelo, datos, key_callback=key_callback) as viewer:
+
+    dt = modelo.opt.timestep
+
     while viewer.is_running():
         
         if stage == 0:
@@ -40,7 +61,27 @@ with mujoco.viewer.launch_passive(modelo, datos, key_callback=key_callback) as v
             ee_id = modelo.body('wrist_3_link').id
             pos = datos.xpos[ee_id]
             print("EE position:", pos)
+
+        elif stage == 4:
+            dx = np.zeros(6)
+            dx[0] = vel_x
+            dx[1] = vel_y
+            dx[2] = vel_z
+
+            # Obtener el Jacobiano
+            jacp = np.zeros((3, modelo.nv))
+            jacr = np.zeros((3, modelo.nv))
+            mujoco.mj_jacSite(modelo, datos, jacp, jacr, 6)
+            J = np.vstack((jacp, jacr))[:, :6]
             
+            # dq = J_pseudo_inversa * Velocidad_Cartesiana
+            dq = np.linalg.pinv(J) @ dx
+            
+            # Integrar la velocidad articular para obtener la posición objetivo
+            # q_nueva = q_actual + dq * dt
+            q_target =  datos.qpos[:6] + dq * dt
+            print(dq * dt)
+            datos.ctrl[:6] = q_target
         mujoco.mj_step(modelo, datos)
         viewer.sync()
         time.sleep(modelo.opt.timestep)
