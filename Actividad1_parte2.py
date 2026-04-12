@@ -6,7 +6,7 @@ import utils as utils
 
 
 ####### ----------------- Agregue Modelo de cubo y gripper a la escena del robot ur5e ###############################
-modelo = mujoco.MjModel.from_xml_path('mujoco_menagerie/franka_emika_panda/mjx_single_cube.xml')
+modelo = mujoco.MjModel.from_xml_path('scene.xml')
 datos = mujoco.MjData(modelo)
 
 # Variables de control de estado

@@ -5,7 +5,7 @@ import time
 
 # 1. Cargar el modelo físico y sus datos
 # Usamos scene.xml porque incluye el robot, iluminación y un suelo.
-modelo = mujoco.MjModel.from_xml_path('mujoco_menagerie\universal_robots_ur5e\scene.xml')
+modelo = mujoco.MjModel.from_xml_path('scene.xml')
 datos = mujoco.MjData(modelo)
 
 # Variables de control de estado
@@ -33,7 +33,7 @@ with mujoco.viewer.launch_passive(modelo, datos, key_callback=key_callback) as v
         elif stage == 1:
             # Escribimos en datos.ctrl aquí.
             # Ahora el modelo se movera a esa posicion y no podremos mover el robot por interfaz
-            datos.ctrl[:6] = np.array([0, -1.5, 1.5, -1.5, -1.5, 0])
+            datos.ctrl[:6] = np.array([0, -1.57, 1.57, -1.57, -1.57, 0])
         elif stage == 2:
             # Podemos acceder al estado de los joints con datos.qpos
             current_q = datos.qpos[:6]

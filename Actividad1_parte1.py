@@ -5,7 +5,7 @@ import time
 
 # 1. Cargar el modelo físico y sus datos
 # Usamos scene.xml porque incluye el robot, iluminación y un suelo.
-modelo = mujoco.MjModel.from_xml_path('mujoco_menagerie\universal_robots_ur5e\scene.xml')
+modelo = mujoco.MjModel.from_xml_path('universal_robots_ur5e/scene.xml')
 datos = mujoco.MjData(modelo)
 
 # Variables de control de estado
