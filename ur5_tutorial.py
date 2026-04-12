@@ -39,11 +39,11 @@ with mujoco.viewer.launch_passive(modelo, datos, key_callback=key_callback) as v
             current_q = datos.qpos[:6]
             print("Joint positions:", current_q)
         elif stage == 3:
-            # Podemos acceder al id de un joint, por ejemplo el writ_3_link, nuestro end_efector
+            # Podemos acceder al id de un componente, por ejemplo el eef_site, nuestro end_efector
             # Podemos acceder a la pose de los joints con datos.xpos
-            ee_id = modelo.body('wrist_3_link').id
-            pos = datos.xpos[ee_id]
-            print("EE position:", pos)
+            site_id = modelo.site('robot0:eef_site').id
+            pos = datos.site_xpos[site_id]
+            print("EEF site position:", pos)
 
         mujoco.mj_step(modelo, datos)
         viewer.sync()

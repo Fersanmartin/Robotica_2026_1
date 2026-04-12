@@ -3,48 +3,55 @@ import mujoco.viewer
 import numpy as np
 import time
 import utils as utils
+from pynput import keyboard
 
-
-####### ----------------- Agregue Modelo de cubo y gripper a la escena del robot ur5e ###############################
 modelo = mujoco.MjModel.from_xml_path('scene.xml')
 datos = mujoco.MjData(modelo)
-
+site_id = mujoco.mj_name2id(modelo, mujoco.mjtObj.mjOBJ_SITE, 'robot0:eef_site')
 # Variables de control de estado
 stage = 0
 
-def key_callback(keycode):
-    global stage
-    #print("tecla:", keycode)
-    if keycode == 32:  # espacio
-        stage += 1 
-        print(f"estado actual {stage}")
 
 
-with mujoco.viewer.launch_passive(modelo, datos, key_callback=key_callback) as viewer:
+#Agregue todas las teclas necesarias
+estado_teclas = {
+    'w': False
+}
+
+def on_press(key):
+    try:
+        k = key.char.lower()
+        print(k)
+        if k in estado_teclas: estado_teclas[k] = True
+    except AttributeError:
+        pass
+
+def on_release(key):
+    try:
+        k = key.char.lower()
+        if k in estado_teclas: estado_teclas[k] = False
+    except AttributeError:
+        pass
+
+# Iniciar el detector de teclado en un hilo separado
+listener = keyboard.Listener(on_press=on_press, on_release=on_release)
+listener.start()
+
+with mujoco.viewer.launch_passive(modelo, datos) as viewer:
 
     dt = modelo.opt.timestep
 
     while viewer.is_running():
-        
-        ####### --------- Encuentre la posicion del cubo a agarrar --------------------------- ###############################
-        if stage == 0:
-            cubo =  modelo.body('box').id
-            pos = datos.xpos[cubo]
-            print("pos cubo:", pos)
 
-        ####### --------- Ocupando la IK del ur5 realizada en utils encuentre la posicion a la cual agarre el cubo --------------------------- ###############################
-        elif stage == 1:
-            pass
+        #Ocupano las teclas de su computador realice una teleoperacion basada en Jacobiano
+        jacp = np.zeros((3, modelo.nv))
+        jacr = np.zeros((3, modelo.nv))
 
-        ####### --------- LLevar el ur5 a esa posicion y cerrar el gripper --------------------------- ###############################
-        elif stage == 2:
-            pass
-    
-        ####### --------- llevar el cubo a la poscion objetivo y liberar agarre --------------------------- ###############################
-        elif stage == 3:
-            pass
+        mujoco.mj_jacSite(modelo, datos, jacp, jacr, site_id)
 
-
+        J = np.vstack((jacp, jacr))
+            
+       
         mujoco.mj_step(modelo, datos)
         viewer.sync()
         time.sleep(modelo.opt.timestep)

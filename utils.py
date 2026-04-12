@@ -28,14 +28,15 @@ def rot_z(qz):
 
 def F_matrices(q):
     #Reescriba los largos de los links para que calcen con el robot pedido
-    d1 = 0.0 
-    d2 = 0.0
-    d3 = 0.0
-    d4 = 0.0
-    d5 = 0.0
-    d6 = 0.0
-    
-    theta1, theta2, d3 = q
+    d1 = 0.1625
+    d2 = 0.425
+    d3 = 0.3922
+    d4 = 0.1333
+    d5 = 0.0997
+    d6 = 0.0996
+    tcp = 0.1
+
+    theta1, theta2, theta3,  theta4,  theta5, theta6 = q
 
     #Escriba la funcion de cinematica directa del robot pedido
     T0 =  traslation(0, 0, 0) 
@@ -45,6 +46,7 @@ def F_matrices(q):
     pos = T1[0:3, 3]
 
     return pos
+
 
 # ------------- JACOBIANO NUMÉRICO -------------
 def jacobian(f, x, epsilon=1e-5):
@@ -72,14 +74,3 @@ def NewtonRaphson(f, q0, target_pos, tol=1e-4, max_iter=100):
         q_new = None
 
     raise ValueError("No se encontró solución después de %d iteraciones" % max_iter)
-
-# ------------- NORMALIZAR ÁNGULOS -------------
-
-#Limite los angulos a los valores del robot real
-def limitar_angulos(q):
-    q_lim = np.array(q, dtype=float)
-
-    q_lim[0] = (q_lim[0] + np.pi) % (2*np.pi) - np.pi
-    q_lim[1] = (q_lim[1] + np.pi) % (2*np.pi) - np.pi
-
-    return q_lim
